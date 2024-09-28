@@ -106,7 +106,7 @@ resource "aws_ecs_cluster" "medusa_cluster" {
 
 # Create IAM Role for ECS Task Execution
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskEcsRole1"
+  name = "ecsTaskEcsRole12"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -178,7 +178,7 @@ resource "aws_ecs_service" "medusa_service" {
 
 # Create a Load Balancer to distribute traffic
 resource "aws_lb" "medusa_lb" {
-  name               = "medusa-lb5"
+  name               = "medusa-lb1"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.medusa_sg.id]
@@ -189,14 +189,17 @@ resource "aws_lb" "medusa_lb" {
 
 # Create a Target Group for the Load Balancer
 resource "aws_lb_target_group" "medusa_tg" {
-  name     = "medusa-target-group5"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.medusa_vpc.id
+  name        = "medusa-target-group1"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.medusa_vpc.id
+  
+  # Set target type to 'ip' for compatibility with Fargate
+  target_type = "ip"
 }
 
 # Create a Listener for the Load Balancer
-resource "aws_lb_listener" "medusa_listener5" {
+resource "aws_lb_listener" "medusa_listener1" {
   load_balancer_arn = aws_lb.medusa_lb.arn
   port              = "80"
   protocol          = "HTTP"
