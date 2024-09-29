@@ -106,7 +106,7 @@ resource "aws_ecs_cluster" "medusa_cluster" {
 
 # Create IAM Role for ECS Task Execution
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "dilecrsgj"
+  name = "medusa-ecs-task-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -130,8 +130,8 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 }
 
 # ECS Task Definition to run Medusa container
-resource "aws_ecs_task_definition" "medusa" {
-  family                   = "medusa-task"
+resource "aws_ecs_task_definition" "medusa_task_definition" {
+  family                   = "medusa-task-definition"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -160,7 +160,7 @@ resource "aws_ecs_task_definition" "medusa" {
 resource "aws_ecs_service" "medusa_service" {
   name            = "medusa-service"
   cluster         = aws_ecs_cluster.medusa_cluster.id
-  task_definition = aws_ecs_task_definition.medusa.arn
+  task_definition = aws_ecs_task_definition.medusa_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
@@ -178,7 +178,7 @@ resource "aws_ecs_service" "medusa_service" {
 
 # Create a Load Balancer to distribute traffic
 resource "aws_lb" "medusa_lb" {
-  name               = "medusaib12"
+  name               = "medusa-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.medusa_sg.id]
@@ -189,17 +189,15 @@ resource "aws_lb" "medusa_lb" {
 
 # Create a Target Group for the Load Balancer
 resource "aws_lb_target_group" "medusa_tg" {
-  name        = "medusa-targetgroup121"
+  name        = "medusa-tg"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.medusa_vpc.id
-  
-  # Set target type to 'ip' for compatibility with Fargate
   target_type = "ip"
 }
 
 # Create a Listener for the Load Balancer
-resource "aws_lb_listener" "medusa_listener645" {
+resource "aws_lb_listener" "medusa_listener" {
   load_balancer_arn = aws_lb.medusa_lb.arn
   port              = "80"
   protocol          = "HTTP"
